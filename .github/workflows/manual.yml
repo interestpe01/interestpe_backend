@@ -1,50 +1,30 @@
-name: Deploy to Contabo VPS Frontend (Manual)
+name: Deploy to AWS EC2
 
 on:
-  workflow_dispatch:
-    inputs:
-      environment:
-        description: "Deployment environment"
-        required: true
-        default: "production"
-      branch:
-        description: "Branch to deploy"
-        required: true
-        default: "main"
-      directory:
-        description: "Directory to be deploy in"
-        required: true
-        default: "frontend"
+  push:
+    branches: [ "main" ]  # Deploy only when pushing to feat/auth
+
+permissions:
+  contents: read
 
 jobs:
   deploy:
+    name: Deploy Code to AWS
     runs-on: ubuntu-latest
-    environment: production
-
     steps:
-      - name: Checkout selected branch
+      - name: Checkout Repository
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.inputs.branch }}
 
-      - name: Setup SSH
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.CONTABO_SSH_KEY }}
-
-      - name: Deploy to Contabo
+      - name: Setup SSH Key
         run: |
-          ssh -tt -o StrictHostKeyChecking=no \
-          ${{ secrets.CONTABO_USER }}@${{ secrets.CONTABO_HOST }} \
-          "export NVM_DIR=\$HOME/.nvm && \
-           [ -s \"\$NVM_DIR/nvm.sh\" ] && . \"\$NVM_DIR/nvm.sh\" && \
-           nvm install 20 && \
-           nvm use 20 && \
-           node -v && npm -v && \
-           cd /home/ubuntu/${{ github.event.inputs.directory }} && \
-           git fetch origin && \
-           git checkout ${{ github.event.inputs.branch }} && \
-           git pull origin ${{ github.event.inputs.branch }} && \
-           npm install && \
-           npm run build && \
-           pm2 restart all"
+          echo "${{ secrets.AWS_SSH_PRIVATE_KEY }}" > aws_key.pem
+          chmod 600 aws_key.pem
+
+      - name: Deploy Code to AWS EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no -i aws_key.pem ${{ secrets.AWS_USER }}@${{ secrets.AWS_HOST }} << 'EOF'
+            cd /path/to/your/project  # Change this to your actual project directory
+            git pull origin feat/auth  # Pull latest code from GitHub
+            npm install  
+            systemctl restart myapp 
+          EOF
