@@ -22,9 +22,10 @@ jobs:
 
       - name: Deploy Code to AWS EC2
         run: |
-          ssh -o StrictHostKeyChecking=no -i aws_key.pem ${{ secrets.AWS_USER }}@${{ secrets.AWS_HOST }} << 'EOF'
-            cd /home/ubuntu/interest_pay  # Change this to your actual project directory
-            git pull origin main  # Pull latest code from GitHub
-            npm install  
-            systemctl restart myapp 
+          ssh ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
+            cd /home/ubuntu/interest_pay
+            git pull origin main
+            docker compose down
+            docker compose up -d --build
           EOF
+
