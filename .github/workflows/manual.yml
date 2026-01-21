@@ -15,10 +15,13 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup SSH Key
+      - name: Setup SSH
         run: |
-          echo "${{ secrets.AWS_SSH_PRIVATE_KEY }}" > aws_key.pem
-          chmod 600 aws_key.pem
+          mkdir -p ~/.ssh
+          echo "${{ secrets.AWS_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.AWS_HOST }} >> ~/.ssh/known_hosts
+
 
       - name: Deploy Code to AWS EC2
         run: |
