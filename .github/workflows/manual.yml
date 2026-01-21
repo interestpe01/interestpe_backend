@@ -22,7 +22,7 @@ jobs:
 
       - name: Deploy Code to AWS EC2
         run: |
-          ssh ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
+          ssh ubuntu@${{ secrets.AWS_HOST }} << 'EOF'
             cd /home/ubuntu/interest_pay
             git pull origin main
             docker compose down
