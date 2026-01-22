@@ -1,8 +1,7 @@
-name: Deploy to AWS EC2
+name: Manual Deploy to AWS EC2
 
 on:
-  push:
-    branches: [ "main" ]  # Deploy only when pushing to feat/auth
+  workflow_dispatch:   # 👈 manual trigger button
 
 permissions:
   contents: read
@@ -11,6 +10,7 @@ jobs:
   deploy:
     name: Deploy Code to AWS
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -22,21 +22,25 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.AWS_HOST }} >> ~/.ssh/known_hosts
 
-
       - name: Deploy Code to AWS EC2
         run: |
           ssh ubuntu@${{ secrets.AWS_HOST }} << 'EOF'
             cd /home/ubuntu/interest_pay
+
+            echo "Pulling latest code..."
             git pull origin main
 
-            # Stop old containers
+            echo "Stopping old containers..."
             docker-compose down
 
-            # Free port 5000 if occupied
+            echo "Cleaning old images..."
+            docker system prune -af
+
+            echo "Freeing port 5000..."
             sudo lsof -ti :5000 | xargs -r sudo kill -9
 
-            # Rebuild and start
+            echo "Rebuilding & starting containers..."
             docker-compose up -d --build
+
+            echo "Deployment completed successfully!"
           EOF
-
-
