@@ -15,7 +15,7 @@ exports.signup = async (req, res) => {
     const hashed = await bcrypt.hash(password, 10);
     const user = await User.create({ phoneNumber, username, emailId, password: hashed });
 
-    otpStore[phoneNumber] = "12345"; // static OTP
+    otpStore[phoneNumber] = "12345";
 
     return res.json({ msg: "User created. Verify OTP to continue.", otp: "12345 (testing)" });
   } catch (err) {
