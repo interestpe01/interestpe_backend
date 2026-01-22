@@ -28,7 +28,15 @@ jobs:
           ssh ubuntu@${{ secrets.AWS_HOST }} << 'EOF'
             cd /home/ubuntu/interest_pay
             git pull origin main
-            docker compose down
-            docker compose up -d --build
+
+            # Stop old containers
+            docker-compose down
+
+            # Free port 5000 if occupied
+            sudo lsof -ti :5000 | xargs -r sudo kill -9
+
+            # Rebuild and start
+            docker-compose up -d --build
           EOF
+
 
