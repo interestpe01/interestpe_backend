@@ -15,8 +15,10 @@ app.use("/api/auth", require("./src/routes/auth.routes"));
 app.use("/api/contacts", require("./src/routes/contact.routes"));
 app.use("/api/expenses", require("./src/routes/expense.routes"));
 
-app.get("/ping",(req,res =>{
-res.json("pong")}))
+app.get("/ping", (req, res) => {
+  res.json("pong");
+});
+
 
 sequelize.sync({ alter: true }).then(() => {
   console.log("DB Synced");
