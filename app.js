@@ -19,6 +19,8 @@ app.get("/ping", (req, res) => {
   res.json("pong");
 });
 
+//hello
+
 
 sequelize.sync({ alter: true }).then(() => {
   console.log("DB Synced");
