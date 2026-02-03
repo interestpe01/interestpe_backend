@@ -9,6 +9,8 @@ app.use(express.json());
 app.use(cookieParser());
 
 console.log("DB_PASS:", typeof process.env.DB_PASS, process.env.DB_PASS);
+console.log("DB_HOST:", process.env.DB_HOST);
+
 
 
 app.use("/api/auth", require("./src/routes/auth.routes"));

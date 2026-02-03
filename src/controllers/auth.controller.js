@@ -7,13 +7,13 @@ let otpStore = {}; // { phoneNumber: "12345" }
 
 exports.signup = async (req, res) => {
   try {
-    const { phoneNumber, username, emailId, password } = req.body;
+    const { phoneNumber, username, emailId, password, fullName, dateOfBirth, gender } = req.body;
 
     const existing = await User.findOne({ where: { phoneNumber } });
     if (existing) return res.status(400).json({ msg: "User already exists" });
 
     const hashed = await bcrypt.hash(password, 10);
-    const user = await User.create({ phoneNumber, username, emailId, password: hashed });
+    const user = await User.create({ phoneNumber, username, emailId, password: hashed, fullName, dateOfBirth, gender });
 
     otpStore[phoneNumber] = "12345";
 
