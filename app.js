@@ -16,6 +16,7 @@ console.log("DB_HOST:", process.env.DB_HOST);
 app.use("/api/auth", require("./src/routes/auth.routes"));
 app.use("/api/contacts", require("./src/routes/contact.routes"));
 app.use("/api/expenses", require("./src/routes/expense.routes"));
+app.use("/api/users", require("./src/routes/user.routes"));
 
 app.get("/ping", (req, res) => {
   res.json("pong");
