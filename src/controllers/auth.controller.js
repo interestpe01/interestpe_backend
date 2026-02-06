@@ -39,8 +39,6 @@ exports.verifyOtp = async (req, res) => {
     delete otpStore[phoneNumber];
 
     const { accessToken, refreshToken } = generateTokens(user);
-    res.cookie("accessToken", accessToken, { httpOnly: true });
-    res.cookie("refreshToken", refreshToken, { httpOnly: true });
 
     return res.json({ msg: "OTP verified", accessToken, refreshToken });
   } catch (err) {
@@ -61,8 +59,6 @@ exports.login = async (req, res) => {
     if (!match) return res.status(400).json({ msg: "Invalid password" });
 
     const { accessToken, refreshToken } = generateTokens(user);
-    res.cookie("accessToken", accessToken, { httpOnly: true });
-    res.cookie("refreshToken", refreshToken, { httpOnly: true });
 
     return res.json({ msg: "Login successful", accessToken, refreshToken });
   } catch (err) {
@@ -73,25 +69,21 @@ exports.login = async (req, res) => {
 
 exports.refreshToken = async (req, res) => {
   try {
-    const token = req.cookies.refreshToken;
-    if (!token) return res.status(401).json({ msg: "No refresh token" });
+    const { refreshToken } = req.body;
 
-    const decoded = jwt.verify(token, process.env.REFRESH_SECRET);
+    if (!refreshToken)
+      return res.status(401).json({ msg: "No refresh token" });
+
+    const decoded = jwt.verify(refreshToken, process.env.REFRESH_SECRET);
+
     const user = await User.findByPk(decoded.userId);
     if (!user) return res.status(404).json({ msg: "User not found" });
 
-    const { accessToken, refreshToken } = generateTokens(user);
-    res.cookie("accessToken", accessToken, { httpOnly: true });
-    res.cookie("refreshToken", refreshToken, { httpOnly: true });
+    const tokens = generateTokens(user);
 
-    return res.json({ msg: "Token refreshed", accessToken });
+    return res.json(tokens);
   } catch (err) {
     return res.status(401).json({ msg: "Invalid refresh token" });
   }
 };
 
-exports.logout = async (req, res) => {
-  res.clearCookie("accessToken");
-  res.clearCookie("refreshToken");
-  return res.json({ msg: "Logged out" });
-};
