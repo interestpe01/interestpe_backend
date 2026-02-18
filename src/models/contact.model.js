@@ -14,6 +14,14 @@ const Contact = sequelize.define("Contact", {
   },
   friendId: {
     type: DataTypes.UUID,
+    allowNull: true
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  phoneNumber: {
+    type: DataTypes.STRING,
     allowNull: false
   }
 });

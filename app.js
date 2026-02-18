@@ -1,17 +1,20 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const dotenv = require("dotenv");
-dotenv.config();
+const path = require("path");
+
+// 🔥 Force dotenv to load from same folder as app.js
+dotenv.config({ path: path.join(__dirname, ".env") });
+
+console.log("Loaded .env from:", path.join(__dirname, ".env"));
+console.log("DB_PASS:", typeof process.env.DB_PASS, process.env.DB_PASS);
+console.log("DB_HOST:", process.env.DB_HOST);
+
 const sequelize = require("./src/config/db");
 
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
-
-console.log("DB_PASS:", typeof process.env.DB_PASS, process.env.DB_PASS);
-console.log("DB_HOST:", process.env.DB_HOST);
-
-
 
 app.use("/api/auth", require("./src/routes/auth.routes"));
 app.use("/api/contacts", require("./src/routes/contact.routes"));
@@ -22,10 +25,9 @@ app.get("/ping", (req, res) => {
   res.json("pong");
 });
 
-//hello
-
-
 sequelize.sync({ alter: true }).then(() => {
   console.log("DB Synced");
-  app.listen(process.env.PORT, () => console.log(`Server running on port ${process.env.PORT}`));
+  app.listen(process.env.PORT, () =>
+    console.log(`Server running on port ${process.env.PORT}`)
+  );
 });
