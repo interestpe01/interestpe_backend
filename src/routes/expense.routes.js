@@ -9,6 +9,6 @@ router.post("/settle/:friendId", authMiddleware, expenseController.settleExpense
 router.get("/report", authMiddleware, expenseController.getMasterReport);
 router.get("/history/:friendId", authMiddleware, expenseController.getHistory);
 router.post("/ledger", authMiddleware, expenseController.addLedgerEntry);
-router.get("/show-ledger/:phone", authMiddleware, expenseController.getLedgerHistory);
+router.post("/show-ledger", authMiddleware, expenseController.getLedgerHistory);
 
 module.exports = router;

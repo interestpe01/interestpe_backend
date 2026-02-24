@@ -313,7 +313,7 @@ exports.addLedgerEntry = async (req, res) => {
 
 exports.getLedgerHistory = async (req, res) => {
   try {
-    const { phone } = req.params;
+    const { phone } = req.body;
     const userId = req.user.id;
 
     // 1. Find the contact for this phone number
