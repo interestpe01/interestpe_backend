@@ -11,7 +11,7 @@ const Expense = sequelize.define("Expense", {
   status: { type: DataTypes.ENUM("pending", "confirmed", "settled"), defaultValue: "pending" },
   interestRate: { type: DataTypes.FLOAT, defaultValue: 0.0 },
   tenure: { type: DataTypes.INTEGER }, // e.g. 12 (months)
-  date: { type: DataTypes.DATEONLY }, // e.g. "2026-01-28"
+  date: { type: DataTypes.DATE }, // e.g. "2026-01-28 14:30:00"
   transactionType: { type: DataTypes.ENUM("LEND", "ACCEPT"), defaultValue: "LEND" },
   repaymentType: { type: DataTypes.ENUM("INTEREST_ONLY", "INTEREST_PRINCIPAL"), allowNull: true } // Only for ACCEPT
 });

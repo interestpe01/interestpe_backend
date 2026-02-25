@@ -259,7 +259,7 @@ exports.settleExpenses = async (req, res) => {
 
 exports.addLedgerEntry = async (req, res) => {
   try {
-    const { phone, amount, description, type } = req.body;
+    const { phone, amount, description, type, interestRate, tenure, repaymentType, date } = req.body;
     const fromUserId = req.user.id;
 
     if (!phone || !amount || !type) {
@@ -278,7 +278,7 @@ exports.addLedgerEntry = async (req, res) => {
         userId: fromUserId,
         friendId: toUserId,
         phoneNumber: phone,
-        name: registeredUser ? (registeredUser.fullName || registeredUser.username) : phone
+        name: registeredUser ? (registeredUser.fullName || registeredUser.username) : (req.body.contactName || phone)
       });
     } else if (toUserId && !contact.friendId) {
       // Update contact if user just registered
@@ -293,18 +293,49 @@ exports.addLedgerEntry = async (req, res) => {
 
     // 4. Create the expense (ledger entry)
     // We auto-confirm these as they are "ledger entries"
-    const expense = await Expense.create({
+    await Expense.create({
       fromUserId,
       toUserId,
       contactId: contact.id,
       amount,
       message: description,
       status: "confirmed",
+      interestRate: interestRate || 0,
+      tenure: tenure || null,
+      repaymentType: (transactionType === "ACCEPT") ? repaymentType : null,
       transactionType,
-      date: new Date().toISOString().split('T')[0] // today's date
+      date: date || new Date().toISOString() // use provided timestamp or current ISO string
     });
 
-    return res.json({ msg: "Ledger entry added successfully", expense });
+    // 5. Fetch full history and calculate balances (Same logic as getLedgerHistory)
+    let whereClause = { contactId: contact.id };
+    if (contact.friendId) {
+      whereClause = {
+        [Op.or]: [
+          { contactId: contact.id },
+          { fromUserId, toUserId: contact.friendId },
+          { fromUserId: contact.friendId, toUserId: fromUserId }
+        ]
+      };
+    }
+
+    const history = await Expense.findAll({
+      where: whereClause,
+      order: [['date', 'ASC'], ['createdAt', 'ASC']]
+    });
+
+    const calculationResult = calculateUserBalance(history, fromUserId);
+
+    // Sort back to DESC for display
+    history.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    return res.json({ 
+      phone,
+      contactName: contact.name,
+      history, 
+      principalOutstanding: calculationResult.totalPrincipalOutstanding,
+      interestOverdue: calculationResult.totalInterestOverdue
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "Error adding ledger entry" });
