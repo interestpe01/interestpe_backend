@@ -259,11 +259,16 @@ exports.settleExpenses = async (req, res) => {
 
 exports.addLedgerEntry = async (req, res) => {
   try {
-    const { phone, amount, description, type, interestRate, tenure, repaymentType, date } = req.body;
+    let { phone, amount, description, type, interestRate, tenure, repaymentType, date } = req.body;
     const fromUserId = req.user.id;
 
     if (!phone || !amount || !type) {
       return res.status(400).json({ msg: "Please provide phone, amount, and type." });
+    }
+
+    amount = parseFloat(amount);
+    if (isNaN(amount)) {
+      return res.status(400).json({ msg: "Amount must be a valid number." });
     }
 
     // 1. Identify if a registered user exists with this phone
@@ -337,8 +342,12 @@ exports.addLedgerEntry = async (req, res) => {
       interestOverdue: calculationResult.totalInterestOverdue
     });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ msg: "Error adding ledger entry" });
+    console.error("Error in addLedgerEntry:", err);
+    res.status(500).json({ 
+      msg: "Error adding ledger entry", 
+      error: err.message,
+      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined 
+    });
   }
 };
 

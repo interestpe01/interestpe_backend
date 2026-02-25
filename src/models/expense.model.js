@@ -13,7 +13,7 @@ const Expense = sequelize.define("Expense", {
   tenure: { type: DataTypes.INTEGER }, // e.g. 12 (months)
   date: { type: DataTypes.DATE }, // e.g. "2026-01-28 14:30:00"
   transactionType: { type: DataTypes.ENUM("LEND", "ACCEPT"), defaultValue: "LEND" },
-  repaymentType: { type: DataTypes.ENUM("INTEREST_ONLY", "INTEREST_PRINCIPAL"), allowNull: true } // Only for ACCEPT
+  repaymentType: { type: DataTypes.ENUM("INTEREST_ONLY", "INTEREST_PRINCIPAL", "monthly"), allowNull: true } // Only for ACCEPT
 });
 
 module.exports = Expense;
